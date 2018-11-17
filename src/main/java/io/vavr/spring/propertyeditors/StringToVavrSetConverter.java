@@ -1,5 +1,6 @@
 package io.vavr.spring.propertyeditors;
 
+import io.vavr.NotImplementedError;
 import io.vavr.collection.*;
 import io.vavr.control.Option;
 import org.springframework.core.convert.ConversionService;
@@ -11,17 +12,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-public class StringToVavrSeqConverter implements ConditionalGenericConverter {
+public class StringToVavrSetConverter implements ConditionalGenericConverter {
 
-    private final Map<Class<? extends Seq>, Class<? extends Seq>> defaultImplementations = HashMap.of(
-            Seq.class, Vector.class,
-            IndexedSeq.class, Vector.class,
-            LinearSeq.class, List.class
+    private final Map<Class<? extends Set>, Class<? extends Set>> defaultImplementations = HashMap.of(
+            Set.class, HashSet.class,
+            SortedSet.class, TreeSet.class
     );
 
     private final ConversionService conversionService;
 
-    public StringToVavrSeqConverter(ConversionService conversionService) {
+    public StringToVavrSetConverter(ConversionService conversionService) {
         this.conversionService = conversionService;
     }
 
@@ -37,7 +37,7 @@ public class StringToVavrSeqConverter implements ConditionalGenericConverter {
 
     @Override
     public java.util.Set<ConvertiblePair> getConvertibleTypes() {
-        return Collections.singleton(new ConvertiblePair(String.class, Seq.class));
+        return Collections.singleton(new ConvertiblePair(String.class, Set.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -50,8 +50,8 @@ public class StringToVavrSeqConverter implements ConditionalGenericConverter {
         Stream<String> stream = Arrays.stream(
                 StringUtils.commaDelimitedListToStringArray((String) source));
 
-        Class<? extends Seq> requestedCollectionType = (Class<? extends Seq>) targetType.getType();
-        Class<? extends Seq> targetCollectionType = defaultImplementations
+        Class<? extends Set> requestedCollectionType = (Class<? extends Set>) targetType.getType();
+        Class<? extends Set> targetCollectionType = defaultImplementations
                 .getOrElse(requestedCollectionType, requestedCollectionType);
 
         Option<SingleGenericTypeDescriptor> elementDesc =
@@ -64,19 +64,18 @@ public class StringToVavrSeqConverter implements ConditionalGenericConverter {
         return collectInto(elementStream, targetCollectionType);
     }
 
-    private Object collectInto(Stream<?> stream, Class<? extends Seq> targetCollection) {
-        if (Array.class.equals(targetCollection)) {
-            return stream.collect(Array.collector());
-        } else if (List.class.equals(targetCollection)) {
-            return stream.collect(List.collector());
-        } else if (Vector.class.equals(targetCollection)) {
-            return stream.collect(Vector.collector());
-        } else if (Queue.class.equals(targetCollection)) {
-            return stream.collect(Queue.collector());
+    private Object collectInto(Stream<?> stream, Class<? extends Set> targetCollection) {
+        if (HashSet.class.equals(targetCollection)) {
+            return stream.collect(HashSet.collector());
+        } else if (LinkedHashSet.class.equals(targetCollection)) {
+            return stream.collect(LinkedHashSet.collector());
+        } else if (TreeSet.class.equals(targetCollection)) {
+            // TODO
+            throw new NotImplementedError();
         }
 
         throw new UnsupportedOperationException("cannot collect into " + targetCollection
-                + ", maybe that type does not extend io.vavr.Seq");
+                + ", maybe that type does not extend io.vavr.Set");
     }
 
 
