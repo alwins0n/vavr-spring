@@ -36,4 +36,24 @@ private class MyController {
 
 ## Usage
 
+Add vavr-spring to your maven dependencies
+
+```xml
 TODO
+```
+
+and register the converters. Depending on your environment (web/tomcat, standalone...) 
+they must be registered in the appropriate `ConfigurableConversionService` e.g.
+
+```java
+@Configuration
+public class MyConfig {
+
+    @Bean
+    public ConfigurableConversionService conversionService(ConfigurableEnvironment environment) {
+        ConfigurableConversionService conversionService = environment.getConversionService();
+        conversionService.addConverter(...);
+        return conversionService;
+    }
+}
+```
