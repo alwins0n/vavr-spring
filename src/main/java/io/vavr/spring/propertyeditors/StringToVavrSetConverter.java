@@ -1,6 +1,5 @@
 package io.vavr.spring.propertyeditors;
 
-import io.vavr.NotImplementedError;
 import io.vavr.collection.*;
 import io.vavr.control.Option;
 import org.springframework.core.convert.ConversionService;
@@ -31,8 +30,26 @@ public class StringToVavrSetConverter implements ConditionalGenericConverter {
                 SingleGenericTypeDescriptor.resolve(targetType);
 
         return elementDesc
-                .map(e -> this.conversionService.canConvert(sourceType, e))
+                .map(e -> isConvertible(sourceType, targetType, e))
                 .getOrElse(true);
+    }
+
+    private boolean isConvertible(TypeDescriptor sourceType, TypeDescriptor targetType, SingleGenericTypeDescriptor elementType) {
+        boolean canConvert = this.conversionService.canConvert(sourceType, elementType);
+        if (isElementComparableRequired(targetType, elementType)) {
+            return canConvert && Comparable.class.isAssignableFrom(elementType.getType());
+        }
+
+        return canConvert;
+    }
+
+    private boolean isElementComparableRequired(TypeDescriptor targetType, TypeDescriptor elementType) {
+        final boolean needsComparable = SortedSet.class.isAssignableFrom(targetType.getType());
+        if (!needsComparable) {
+            return true;
+        } else {
+            return Comparable.class.isAssignableFrom(elementType.getType());
+        }
     }
 
     @Override
@@ -64,14 +81,14 @@ public class StringToVavrSetConverter implements ConditionalGenericConverter {
         return collectInto(elementStream, targetCollectionType);
     }
 
+    @SuppressWarnings("unchecked")
     private Object collectInto(Stream<?> stream, Class<? extends Set> targetCollection) {
         if (HashSet.class.equals(targetCollection)) {
             return stream.collect(HashSet.collector());
         } else if (LinkedHashSet.class.equals(targetCollection)) {
             return stream.collect(LinkedHashSet.collector());
         } else if (TreeSet.class.equals(targetCollection)) {
-            // TODO
-            throw new NotImplementedError();
+            return ((Stream<? extends Comparable<?>>) stream).collect(TreeSet.<Comparable>collector());
         }
 
         throw new UnsupportedOperationException("cannot collect into " + targetCollection

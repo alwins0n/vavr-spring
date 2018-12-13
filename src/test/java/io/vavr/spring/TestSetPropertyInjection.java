@@ -1,8 +1,6 @@
 package io.vavr.spring;
 
-import io.vavr.collection.HashSet;
-import io.vavr.collection.LinkedHashSet;
-import io.vavr.collection.Set;
+import io.vavr.collection.*;
 import io.vavr.spring.propertyeditors.StringToVavrSetConverter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,12 +55,11 @@ public class TestSetPropertyInjection {
         HashSet<Integer> shouldBeHashSet;
         @Value("1,2,3")
         LinkedHashSet<Integer> shouldBeLinkedHashSet;
-        /*
         @Value("1,2,3")
         SortedSet<Integer> shouldBeSortedSet;
         @Value("1,2,3")
         TreeSet<Integer> shouldBeTreeSet;
-        */
+
     }
 
 }
