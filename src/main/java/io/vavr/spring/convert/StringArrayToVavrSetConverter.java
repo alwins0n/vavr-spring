@@ -10,11 +10,11 @@ import java.util.Collections;
 
 import static io.vavr.spring.convert.VavrStringConversionUtils.isGenericTypeConvertable;
 
-public class ArrayToVavrSetConverter implements ConditionalGenericConverter {
+public class StringArrayToVavrSetConverter implements ConditionalGenericConverter {
 
     private final ConversionService conversionService;
 
-    public ArrayToVavrSetConverter(ConversionService conversionService) {
+    public StringArrayToVavrSetConverter(ConversionService conversionService) {
         this.conversionService = conversionService;
     }
 

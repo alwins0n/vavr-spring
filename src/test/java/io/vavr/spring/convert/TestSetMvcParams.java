@@ -103,7 +103,7 @@ public class TestSetMvcParams {
         @Override
         public void addFormatters(FormatterRegistry registry) {
             registry.addConverter(new StringToVavrSetConverter((ConversionService) registry));
-            registry.addConverter(new ArrayToVavrSetConverter((ConversionService) registry));
+            registry.addConverter(new StringArrayToVavrSetConverter((ConversionService) registry));
         }
     }
 
