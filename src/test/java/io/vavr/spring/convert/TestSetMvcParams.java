@@ -1,8 +1,8 @@
 package io.vavr.spring.convert;
 
-import io.vavr.collection.List;
-import io.vavr.collection.Seq;
-import io.vavr.collection.Vector;
+import io.vavr.collection.HashSet;
+import io.vavr.collection.Set;
+import io.vavr.collection.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,14 +30,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringJUnitWebConfig(classes = TestSeqMvcParams.TestConfig.class)
-public class TestSeqMvcParams {
+@SpringJUnitWebConfig(classes = TestSetMvcParams.TestConfig.class)
+public class TestSetMvcParams {
 
     @Autowired
     private WebApplicationContext wac;
 
     @Autowired
-    private TestSeqController seqController;
+    private TestSetController setController;
 
     private MockMvc mockMvc;
 
@@ -46,47 +46,47 @@ public class TestSeqMvcParams {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
-    // tests for seq interface
+    // tests for Set interface
     @Test
-    public void testMvcArg_fromRequestParams_shouldBeSeq() throws Exception {
-        seqController.setAssertion(param -> assertEquals(Vector.of(1, 2), param));
-        mockMvc.perform(get("/seq?value=1&value=2"))
+    public void testMvcArg_fromRequestParams_shouldBeSet() throws Exception {
+        setController.setAssertion(param -> assertEquals(HashSet.of(1, 2), param));
+        mockMvc.perform(get("/set?value=1&value=2&value=1"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testMvcArg_fromEmptyString_shouldBeEmptySeq() throws Exception {
-        seqController.setAssertion(param -> assertEquals(Vector.empty(), param));
-        mockMvc.perform(get("/seq?value="))
+    public void testMvcArg_fromEmptyString_shouldBeEmptySet() throws Exception {
+        setController.setAssertion(param -> assertEquals(HashSet.empty(), param));
+        mockMvc.perform(get("/set?value="))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testMvcArg_fromSingleParamString_shouldBeNoneEmptySeq() throws Exception {
-        seqController.setAssertion(param -> assertEquals(Vector.of(1), param));
-        mockMvc.perform(get("/seq?value=1"))
+    public void testMvcArg_fromSingleParamString_shouldBeNoneEmptySet() throws Exception {
+        setController.setAssertion(param -> assertEquals(HashSet.of(1), param));
+        mockMvc.perform(get("/set?value=1"))
                 .andExpect(status().isOk());
     }
 
     // tests for concrete subtype
     @Test
-    public void testMvcArg_fromRequestParams_shouldBeList() throws Exception {
-        seqController.setAssertion(param -> assertEquals(List.of(1, 2), param));
-        mockMvc.perform(get("/list?value=1&value=2"))
+    public void testMvcArg_fromRequestParams_shouldBeTreeSet() throws Exception {
+        setController.setAssertion(param -> assertEquals(TreeSet.of(1, 2), param));
+        mockMvc.perform(get("/tree-set?value=1&value=2&value=1"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testMvcArg_fromEmptyString_shouldBeEmptyList() throws Exception {
-        seqController.setAssertion(param -> assertEquals(List.empty(), param));
-        mockMvc.perform(get("/list?value="))
+    public void testMvcArg_fromEmptyString_shouldBeEmptyTreeSet() throws Exception {
+        setController.setAssertion(param -> assertEquals(TreeSet.empty(), param));
+        mockMvc.perform(get("/tree-set?value="))
                 .andExpect(status().isOk());
     }
 
     @Test
-    public void testMvcArg_fromSingleParamString_shouldBeNoneEmptyList() throws Exception {
-        seqController.setAssertion(param -> assertEquals(List.of(1), param));
-        mockMvc.perform(get("/list?value=1"))
+    public void testMvcArg_fromSingleParamString_shouldBeNoneEmptyTreeSet() throws Exception {
+        setController.setAssertion(param -> assertEquals(TreeSet.of(1), param));
+        mockMvc.perform(get("/tree-set?value=1"))
                 .andExpect(status().isOk());
     }
 
@@ -96,33 +96,33 @@ public class TestSeqMvcParams {
             basePackages = "io.vavr.spring",
             includeFilters = @ComponentScan.Filter(
                     type = FilterType.ASSIGNABLE_TYPE,
-                    value = TestSeqController.class))
+                    value = TestSetController.class))
     static class TestConfig implements WebMvcConfigurer {
 
 
         @Override
         public void addFormatters(FormatterRegistry registry) {
-            registry.addConverter(new StringToVavrSeqConverter((ConversionService) registry));
-            registry.addConverter(new StringArrayToVavrSeqConverter((ConversionService) registry));
+            registry.addConverter(new StringToVavrSetConverter((ConversionService) registry));
+            registry.addConverter(new ArrayToVavrSetConverter((ConversionService) registry));
         }
     }
 
     @RestController
-    private static class TestSeqController {
+    private static class TestSetController {
 
-        private Consumer<Seq<Integer>> assertion;
+        private Consumer<Set<Integer>> assertion;
 
-        void setAssertion(Consumer<Seq<Integer>> assertion) {
+        void setAssertion(Consumer<Set<Integer>> assertion) {
             this.assertion = assertion;
         }
 
-        @GetMapping("/seq")
-        public void shouldBeSeq(@RequestParam("value") Seq<Integer> param) {
+        @GetMapping("/set")
+        public void shouldBeSet(@RequestParam("value") Set<Integer> param) {
             assertion.accept(param);
         }
 
-        @GetMapping("/list")
-        public void shouldBeList(@RequestParam("value") List<Integer> param) {
+        @GetMapping("/tree-set")
+        public void shouldBeTreeSet(@RequestParam("value") TreeSet<Integer> param) {
             assertion.accept(param);
         }
     }

@@ -8,19 +8,19 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static io.vavr.spring.convert.VavrConversionUtils.isGenericTypeConvertable;
+import static io.vavr.spring.convert.VavrStringConversionUtils.isGenericTypeConvertable;
 
-public class ArrayToVavrSeqConverter implements ConditionalGenericConverter {
+public class StringArrayToVavrSeqConverter implements ConditionalGenericConverter {
 
     private final ConversionService conversionService;
 
-    public ArrayToVavrSeqConverter(ConversionService conversionService) {
+    public StringArrayToVavrSeqConverter(ConversionService conversionService) {
         this.conversionService = conversionService;
     }
 
     @Override
     public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-        return isGenericTypeConvertable(sourceType, targetType, conversionService);
+        return isGenericTypeConvertable(targetType, conversionService);
     }
 
     @Override
@@ -34,8 +34,7 @@ public class ArrayToVavrSeqConverter implements ConditionalGenericConverter {
             return null;
         }
 
-        return VavrSeqConversionUtils.convert(Arrays.stream((String[]) source),
-                sourceType, targetType, conversionService);
+        return VavrStringToSeqConversionUtils.convert(Arrays.stream((String[]) source), targetType, conversionService);
     }
 
 }

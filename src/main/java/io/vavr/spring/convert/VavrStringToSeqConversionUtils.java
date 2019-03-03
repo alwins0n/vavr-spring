@@ -1,13 +1,14 @@
 package io.vavr.spring.convert;
 
 import io.vavr.collection.*;
-import io.vavr.control.Option;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
 import java.util.stream.Stream;
 
-class VavrSeqConversionUtils {
+import static io.vavr.spring.convert.VavrStringConversionUtils.toElementStream;
+
+class VavrStringToSeqConversionUtils {
 
     private static final Map<Class<? extends Seq>, Class<? extends Seq>> defaultImplementations = HashMap.of(
             Seq.class, Vector.class,
@@ -15,20 +16,15 @@ class VavrSeqConversionUtils {
             LinearSeq.class, List.class
     );
 
+    static Object convert(Stream<String> source, TypeDescriptor targetType, ConversionService conversionService) {
+        return collectInto(toElementStream(source, targetType, conversionService),
+                getTargetCollectionType(targetType));
+    }
+
     @SuppressWarnings("unchecked")
-    static Object convert(Stream<String> source, TypeDescriptor sourceType, TypeDescriptor targetType, ConversionService conversionService) {
+    private static Class<? extends Seq> getTargetCollectionType(TypeDescriptor targetType) {
         Class<? extends Seq> requestedCollectionType = (Class<? extends Seq>) targetType.getType();
-        Class<? extends Seq> targetCollectionType = defaultImplementations
-                .getOrElse(requestedCollectionType, requestedCollectionType);
-
-        Option<SingleGenericTypeDescriptor> elementDesc =
-                SingleGenericTypeDescriptor.resolve(targetType);
-
-        Stream<?> elementStream = elementDesc.isDefined() ?
-                source.map(f -> conversionService.convert(f, sourceType.elementTypeDescriptor(f), elementDesc.get())) :
-                source;
-
-        return collectInto(elementStream, targetCollectionType);
+        return defaultImplementations.getOrElse(requestedCollectionType, requestedCollectionType);
     }
 
     private static Object collectInto(Stream<?> stream, Class<? extends Seq> targetCollection) {
