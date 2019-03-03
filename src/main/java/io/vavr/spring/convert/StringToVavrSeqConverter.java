@@ -39,7 +39,7 @@ public class StringToVavrSeqConverter implements ConditionalGenericConverter {
         Stream<String> stream = Arrays.stream(
                 StringUtils.commaDelimitedListToStringArray((String) source));
 
-        return SeqConversionUtils.convert(stream,
+        return VavrSeqConversionUtils.convert(stream,
                 sourceType, targetType, conversionService);
     }
 

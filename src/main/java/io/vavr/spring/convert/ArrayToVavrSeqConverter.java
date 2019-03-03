@@ -34,7 +34,7 @@ public class ArrayToVavrSeqConverter implements ConditionalGenericConverter {
             return null;
         }
 
-        return SeqConversionUtils.convert(Arrays.stream((String[]) source),
+        return VavrSeqConversionUtils.convert(Arrays.stream((String[]) source),
                 sourceType, targetType, conversionService);
     }
 

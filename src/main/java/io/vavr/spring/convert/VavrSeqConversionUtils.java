@@ -7,7 +7,7 @@ import org.springframework.core.convert.TypeDescriptor;
 
 import java.util.stream.Stream;
 
-class SeqConversionUtils {
+class VavrSeqConversionUtils {
 
     private static final Map<Class<? extends Seq>, Class<? extends Seq>> defaultImplementations = HashMap.of(
             Seq.class, Vector.class,
