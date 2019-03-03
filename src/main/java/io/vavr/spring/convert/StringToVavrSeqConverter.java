@@ -1,20 +1,22 @@
-package io.vavr.spring.propertyeditors;
+package io.vavr.spring.convert;
 
 import io.vavr.collection.Seq;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Stream;
 
-import static io.vavr.spring.propertyeditors.VavrConversionUtils.isGenericTypeConvertable;
+import static io.vavr.spring.convert.VavrConversionUtils.isGenericTypeConvertable;
 
-public class ArrayToVavrSeqConverter implements ConditionalGenericConverter {
+public class StringToVavrSeqConverter implements ConditionalGenericConverter {
 
     private final ConversionService conversionService;
 
-    public ArrayToVavrSeqConverter(ConversionService conversionService) {
+    public StringToVavrSeqConverter(ConversionService conversionService) {
         this.conversionService = conversionService;
     }
 
@@ -25,7 +27,7 @@ public class ArrayToVavrSeqConverter implements ConditionalGenericConverter {
 
     @Override
     public java.util.Set<ConvertiblePair> getConvertibleTypes() {
-        return Collections.singleton(new ConvertiblePair(String[].class, Seq.class));
+        return Collections.singleton(new ConvertiblePair(String.class, Seq.class));
     }
 
     @Override
@@ -34,7 +36,10 @@ public class ArrayToVavrSeqConverter implements ConditionalGenericConverter {
             return null;
         }
 
-        return SeqConversionUtils.convert(Arrays.stream((String[]) source),
+        Stream<String> stream = Arrays.stream(
+                StringUtils.commaDelimitedListToStringArray((String) source));
+
+        return SeqConversionUtils.convert(stream,
                 sourceType, targetType, conversionService);
     }
 

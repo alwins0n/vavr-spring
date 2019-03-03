@@ -1,4 +1,4 @@
-package io.vavr.spring.propertyeditors;
+package io.vavr.spring.convert;
 
 import io.vavr.collection.*;
 import io.vavr.control.Option;

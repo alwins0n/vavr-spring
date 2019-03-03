@@ -1,7 +1,6 @@
-package io.vavr.spring;
+package io.vavr.spring.convert;
 
 import io.vavr.collection.*;
-import io.vavr.spring.propertyeditors.StringToVavrSetConverter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +15,22 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = TestSetPropertyInjection.TestConfig.class)
-public class TestSetPropertyInjection {
+@ContextConfiguration(classes = TestSeqPropertyInjection.TestConfig.class)
+public class TestSeqPropertyInjection {
 
     @Autowired
     private TestBean bean;
 
     @Test
-    public void testProperties_fromString_shouldBeSets() {
-        assertEquals(HashSet.of(1, 2, 3), bean.shouldBeSet);
-        assertEquals(HashSet.empty(), bean.shouldBeEmptySet);
-        assertEquals(HashSet.of(1, 2, 3), bean.shouldBeHashSet);
-        assertEquals(LinkedHashSet.of(1, 2, 3), bean.shouldBeLinkedHashSet);
+    public void testProperties_fromString_shouldBeSeqs() {
+        assertEquals(Vector.of(1, 2, 3), bean.shouldBeSeq);
+        assertEquals(Vector.empty(), bean.shouldBeEmptySeq);
+        assertEquals(List.of(1, 2, 3), bean.shouldBeList);
+        assertEquals(Vector.of(1, 2, 3), bean.shouldBeVector);
+        assertEquals(List.of(1, 2, 3), bean.shouldBeLinearSeq);
+        assertEquals(List.of(1, 2, 3), bean.shouldBeIndexedSeq);
+        assertEquals(Queue.of(1, 2, 3), bean.shouldBeQueue);
+        assertEquals(Array.of(1, 2, 3), bean.shouldBeArray);
     }
 
     @Configuration
@@ -36,7 +39,7 @@ public class TestSetPropertyInjection {
         @Bean
         public ConfigurableConversionService conversionService(ConfigurableEnvironment environment) {
             final ConfigurableConversionService conversionService = environment.getConversionService();
-            conversionService.addConverter(new StringToVavrSetConverter(conversionService));
+            conversionService.addConverter(new StringToVavrSeqConverter(conversionService));
             return conversionService;
         }
 
@@ -48,18 +51,21 @@ public class TestSetPropertyInjection {
 
     private static class TestBean {
         @Value("1,2,3")
-        Set<Integer> shouldBeSet;
+        Seq<Integer> shouldBeSeq;
         @Value("")
-        Set<Integer> shouldBeEmptySet;
+        Seq<Integer> shouldBeEmptySeq;
         @Value("1,2,3")
-        HashSet<Integer> shouldBeHashSet;
+        List<Integer> shouldBeList;
         @Value("1,2,3")
-        LinkedHashSet<Integer> shouldBeLinkedHashSet;
+        Vector<Integer> shouldBeVector;
         @Value("1,2,3")
-        SortedSet<Integer> shouldBeSortedSet;
+        LinearSeq<Integer> shouldBeLinearSeq;
         @Value("1,2,3")
-        TreeSet<Integer> shouldBeTreeSet;
-
+        IndexedSeq<Integer> shouldBeIndexedSeq;
+        @Value("1,2,3")
+        Queue<Integer> shouldBeQueue;
+        @Value("1,2,3")
+        Array<Integer> shouldBeArray;
     }
 
 }

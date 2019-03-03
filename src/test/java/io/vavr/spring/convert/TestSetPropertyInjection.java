@@ -1,7 +1,6 @@
-package io.vavr.spring;
+package io.vavr.spring.convert;
 
-import io.vavr.control.Option;
-import io.vavr.spring.propertyeditors.StringToOptionConverter;
+import io.vavr.collection.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,30 +15,18 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = TestOptionPropertyInjection.TestConfig.class)
-public class TestOptionPropertyInjection {
+@ContextConfiguration(classes = TestSetPropertyInjection.TestConfig.class)
+public class TestSetPropertyInjection {
 
     @Autowired
     private TestBean bean;
 
     @Test
-    public void testProperties_fromEmptyString_shouldBeNone() {
-        assertEquals(Option.none(), bean.shouldBeNone);
-    }
-
-    @Test
-    public void testProperties_fromString_shouldBePresentOption() {
-        assertEquals(Option.some(1), bean.shouldBeSomeOne);
-    }
-
-    @Test
-    public void testProperties_fromString_shouldBeNestedPresentOption() {
-        assertEquals(Option.some(Option.some(1)), bean.shouldBeNestedOne);
-    }
-
-    @Test
-    public void testStringProperty_shouldBePresentOption() {
-        assertEquals(Option.some("1"), bean.shouldBeSomeString);
+    public void testProperties_fromString_shouldBeSets() {
+        assertEquals(HashSet.of(1, 2, 3), bean.shouldBeSet);
+        assertEquals(HashSet.empty(), bean.shouldBeEmptySet);
+        assertEquals(HashSet.of(1, 2, 3), bean.shouldBeHashSet);
+        assertEquals(LinkedHashSet.of(1, 2, 3), bean.shouldBeLinkedHashSet);
     }
 
     @Configuration
@@ -48,7 +35,7 @@ public class TestOptionPropertyInjection {
         @Bean
         public ConfigurableConversionService conversionService(ConfigurableEnvironment environment) {
             final ConfigurableConversionService conversionService = environment.getConversionService();
-            conversionService.addConverter(new StringToOptionConverter(conversionService));
+            conversionService.addConverter(new StringToVavrSetConverter(conversionService));
             return conversionService;
         }
 
@@ -59,14 +46,19 @@ public class TestOptionPropertyInjection {
     }
 
     private static class TestBean {
+        @Value("1,2,3")
+        Set<Integer> shouldBeSet;
         @Value("")
-        Option<Integer> shouldBeNone;
-        @Value("1")
-        Option<Integer> shouldBeSomeOne;
-        @Value("1")
-        Option<Option<Integer>> shouldBeNestedOne;
-        @Value("1")
-        Option<String> shouldBeSomeString;
+        Set<Integer> shouldBeEmptySet;
+        @Value("1,2,3")
+        HashSet<Integer> shouldBeHashSet;
+        @Value("1,2,3")
+        LinkedHashSet<Integer> shouldBeLinkedHashSet;
+        @Value("1,2,3")
+        SortedSet<Integer> shouldBeSortedSet;
+        @Value("1,2,3")
+        TreeSet<Integer> shouldBeTreeSet;
+
     }
 
 }

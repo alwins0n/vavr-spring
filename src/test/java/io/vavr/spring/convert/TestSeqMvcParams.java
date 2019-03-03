@@ -1,10 +1,8 @@
-package io.vavr.spring;
+package io.vavr.spring.convert;
 
 import io.vavr.collection.List;
 import io.vavr.collection.Seq;
 import io.vavr.collection.Vector;
-import io.vavr.spring.propertyeditors.ArrayToVavrSeqConverter;
-import io.vavr.spring.propertyeditors.StringToVavrSeqConverter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

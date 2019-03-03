@@ -1,4 +1,4 @@
-package io.vavr.spring.propertyeditors;
+package io.vavr.spring.convert;
 
 import io.vavr.control.Option;
 import org.springframework.core.ResolvableType;

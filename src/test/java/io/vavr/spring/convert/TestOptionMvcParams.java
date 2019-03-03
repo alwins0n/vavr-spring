@@ -1,7 +1,6 @@
-package io.vavr.spring;
+package io.vavr.spring.convert;
 
 import io.vavr.control.Option;
-import io.vavr.spring.propertyeditors.StringToOptionConverter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
