@@ -1,7 +1,6 @@
 package io.vavr.spring.propertyeditors;
 
-import io.vavr.collection.*;
-import io.vavr.control.Option;
+import io.vavr.collection.Seq;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
@@ -11,13 +10,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Stream;
 
-public class StringToVavrSeqConverter implements ConditionalGenericConverter {
+import static io.vavr.spring.propertyeditors.VavrConversionUtils.isGenericTypeConvertable;
 
-    private final Map<Class<? extends Seq>, Class<? extends Seq>> defaultImplementations = HashMap.of(
-            Seq.class, Vector.class,
-            IndexedSeq.class, Vector.class,
-            LinearSeq.class, List.class
-    );
+public class StringToVavrSeqConverter implements ConditionalGenericConverter {
 
     private final ConversionService conversionService;
 
@@ -27,12 +22,7 @@ public class StringToVavrSeqConverter implements ConditionalGenericConverter {
 
     @Override
     public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-        Option<SingleGenericTypeDescriptor> elementDesc =
-                SingleGenericTypeDescriptor.resolve(targetType);
-
-        return elementDesc
-                .map(e -> this.conversionService.canConvert(sourceType, e))
-                .getOrElse(true);
+        return isGenericTypeConvertable(sourceType, targetType, conversionService);
     }
 
     @Override
@@ -40,7 +30,6 @@ public class StringToVavrSeqConverter implements ConditionalGenericConverter {
         return Collections.singleton(new ConvertiblePair(String.class, Seq.class));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
         if (source == null) {
@@ -50,38 +39,8 @@ public class StringToVavrSeqConverter implements ConditionalGenericConverter {
         Stream<String> stream = Arrays.stream(
                 StringUtils.commaDelimitedListToStringArray((String) source));
 
-        Class<? extends Seq> requestedCollectionType = (Class<? extends Seq>) targetType.getType();
-        Class<? extends Seq> targetCollectionType = defaultImplementations
-                .getOrElse(requestedCollectionType, requestedCollectionType);
-
-        Option<SingleGenericTypeDescriptor> elementDesc =
-                SingleGenericTypeDescriptor.resolve(targetType);
-
-        Stream<?> elementStream = elementDesc.isDefined() ?
-                stream.map(f -> getElement(f, sourceType, elementDesc.get())) :
-                stream;
-
-        return collectInto(elementStream, targetCollectionType);
-    }
-
-    private Object collectInto(Stream<?> stream, Class<? extends Seq> targetCollection) {
-        if (Array.class.equals(targetCollection)) {
-            return stream.collect(Array.collector());
-        } else if (List.class.equals(targetCollection)) {
-            return stream.collect(List.collector());
-        } else if (Vector.class.equals(targetCollection)) {
-            return stream.collect(Vector.collector());
-        } else if (Queue.class.equals(targetCollection)) {
-            return stream.collect(Queue.collector());
-        }
-
-        throw new UnsupportedOperationException("cannot collect into " + targetCollection
-                + ", maybe that type does not extend io.vavr.Seq");
-    }
-
-
-    private Object getElement(String from, TypeDescriptor sourceType, TypeDescriptor targetType) {
-        return this.conversionService.convert(from.trim(), sourceType, targetType);
+        return SeqConversionUtils.convert(stream,
+                sourceType, targetType, conversionService);
     }
 
 }
