@@ -54,7 +54,7 @@ public class MyConfig {
     @Bean
     public ConfigurableConversionService conversionService(ConfigurableEnvironment environment) {
         ConfigurableConversionService conversionService = environment.getConversionService();
-        conversionService.addConverter(...);
+        conversionService.addConverter(...)
         return conversionService;
     }
 }
@@ -79,7 +79,7 @@ public class MyController {
     
     @RequestMapping("/optional-param")
     public Object getByName(@RequestParam(value = "id", required = false) Optional<String> name) {
-        ... Option.ofOptional(name).map(n -> ...);
+        ... Option.ofOptional(name).map(n -> ...)
     }
 }
 ```
@@ -95,5 +95,6 @@ thus part of spring-data-jpa
 
 - Array syntax binding
 - Map based binding
+- YAML, JSON
 
 see https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-Configuration-Binding 
