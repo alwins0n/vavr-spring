@@ -40,22 +40,33 @@ public class MyController {
 
 Add vavr-spring to your maven dependencies
 
+*TODO version*
 ```xml
-TODO
+<dependency>
+    <groupId>io.vavr</groupId>
+    <artifactId>vavr-spring</artifactId>
+    <version>0.10.0-SNAPSHOT</version>
+</dependency>
 ```
 
 and register the converters. Depending on your environment (web/tomcat, standalone...) 
-they must be registered in the appropriate `ConfigurableConversionService` e.g.
+they must be registered in the appropriate `ConfigurableConversionService`.
+E.g. letting spring provide it for you:
 
 ```java
 @Configuration
 public class MyConfig {
 
-    @Bean
-    public ConfigurableConversionService conversionService(ConfigurableEnvironment environment) {
-        ConfigurableConversionService conversionService = environment.getConversionService();
-        conversionService.addConverter(...)
-        return conversionService;
+    ConfigurableConversionService conversionService;
+
+    public MyConfig(ConfigurableConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
+    @PostConstruct
+    public void setUpConverters() {
+        conversionService.addConverter(new StringToVavrCollectionConverter(conversionService));
+        ...
     }
 }
 ```
@@ -66,6 +77,12 @@ The following converters are available to register:
 - `StringToVavrSetConverter`
 - `StringArrayToVavrSetConverter`
 - `StringToOptionConverter`
+
+They can also conveniently be set up by calling 
+
+```java
+VavrConverters.registerAll(conversionService);
+```
 
 ## Limitations
 
