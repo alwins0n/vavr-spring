@@ -7,15 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.support.ConfigurableConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration(classes = TestSeqPropertyInjection.TestConfig.class)
+@TestPropertySource
 public class TestSeqPropertyInjection {
 
     @Autowired
@@ -33,6 +36,11 @@ public class TestSeqPropertyInjection {
         assertEquals(Array.of(1, 2, 3), bean.shouldBeArray);
     }
 
+    @Test
+    public void testProperties_fromCollectionBinding_shouldBeSeqs() {
+        assertEquals(Vector.of(1, 2), bean.shouldBeSeqFromCollectionBinding);
+    }
+
     @Configuration
     static class TestConfig {
 
@@ -46,6 +54,11 @@ public class TestSeqPropertyInjection {
         @Bean
         public TestBean testBean() {
             return new TestBean();
+        }
+
+        @Bean
+        public PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer() {
+            return new PropertySourcesPlaceholderConfigurer();
         }
     }
 
@@ -66,6 +79,10 @@ public class TestSeqPropertyInjection {
         Queue<Integer> shouldBeQueue;
         @Value("1,2,3")
         Array<Integer> shouldBeArray;
+
+        @Value("${should.be.seq}")
+        Seq<Integer> shouldBeSeqFromCollectionBinding;
+
     }
 
 }
